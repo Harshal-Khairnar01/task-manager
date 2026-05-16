@@ -21,7 +21,7 @@ const Dashboard = () => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="glass p-5 md:p-8 rounded-2xl border border-textMain/10 bg-gradient-to-br from-surface to-surface/50">
         <h1 className="text-2xl md:text-3xl font-bold textMain mb-2">
-          {stats.totalProjects === 0 ? `Welcome to TaskFlow, ${user?.name.split(' ')[0]}! 🚀` : `Welcome back, ${user?.name.split(' ')[0]}! 👋`}
+          {stats.totalProjects === 0 ? `Welcome to Worksphere, ${user?.name.split(' ')[0]}! 🚀` : `Welcome back, ${user?.name.split(' ')[0]}! 👋`}
         </h1>
         <p className="text-sm md:text-base text-textMuted">
           {stats.totalProjects === 0 ? "Let's get started by creating your first project." : "Here is what's happening with your projects today."}

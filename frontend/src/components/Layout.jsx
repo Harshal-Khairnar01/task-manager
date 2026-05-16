@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { FiHome, FiFolder, FiLogOut, FiMenu, FiX, FiCheckCircle, FiSearch, FiBell, FiSettings, FiUsers } from 'react-icons/fi';
+import { FiHome, FiFolder, FiLogOut, FiMenu, FiX, FiBriefcase, FiSearch, FiBell, FiSettings, FiUsers } from 'react-icons/fi';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
 import { fetchNotifications } from '../store/notificationSlice';
@@ -65,7 +65,7 @@ const Layout = () => {
       >
         <div className="p-6 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gradient flex items-center gap-2">
-            <FiCheckCircle className="text-primary" /> TaskFlow
+            <FiBriefcase className="text-primary" /> Worksphere
           </h1>
           <button className="md:hidden text-textMuted p-2 hover:bg-textMain/5 rounded-lg" onClick={() => setIsSidebarOpen(false)}>
             <FiX size={24} />
@@ -162,8 +162,8 @@ const Layout = () => {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-textMuted">
               <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center md:text-left">
                 <div className="flex items-center gap-2">
-                  <FiCheckCircle className="text-primary" />
-                  <span className="font-bold text-textMain">TaskFlow</span>
+                  <FiBriefcase className="text-primary" />
+                  <span className="font-bold text-textMain">Worksphere</span>
                 </div>
                 <span className="hidden md:inline text-textMain/20">|</span>
                 <span>&copy; {new Date().getFullYear()} All rights reserved.</span>

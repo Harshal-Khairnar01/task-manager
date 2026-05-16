@@ -16,6 +16,8 @@ const ProjectDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeletingProject, setIsDeletingProject] = useState(false);
   const [taskToAssign, setTaskToAssign] = useState(null);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [activeTab, setActiveTab] = useState('board'); // 'board' or 'progress'
@@ -71,12 +73,13 @@ const ProjectDetail = () => {
   };
 
   const handleDeleteProject = async () => {
-    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      const resultAction = await dispatch(deleteProject(id));
-      if (deleteProject.fulfilled.match(resultAction)) {
-        navigate('/projects');
-      }
+    setIsDeletingProject(true);
+    const resultAction = await dispatch(deleteProject(id));
+    if (deleteProject.fulfilled.match(resultAction)) {
+      setShowDeleteModal(false);
+      navigate('/projects');
     }
+    setIsDeletingProject(false);
   };
 
   if (isLoading || !currentProject) return <div className="p-8 text-textMuted">Loading project details...</div>;
@@ -122,7 +125,7 @@ const ProjectDetail = () => {
                 <FiUserPlus /> Add Member
               </button>
               <button 
-                onClick={handleDeleteProject}
+                onClick={() => setShowDeleteModal(true)}
                 className="flex items-center gap-2 bg-danger/10 text-danger px-4 py-2 rounded-lg hover:bg-danger/20 border border-danger/20 transition-colors"
                 title="Delete Project"
               >
@@ -406,6 +409,39 @@ const ProjectDetail = () => {
                 <button type="submit" className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90">Add Member</button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Project Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass w-full max-w-md p-6 rounded-2xl shadow-2xl border border-danger/20">
+            <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mb-4">
+              <FiTrash2 size={22} />
+            </div>
+            <h2 className="text-xl font-bold mb-2 text-textMain">Delete Project</h2>
+            <p className="text-sm text-textMuted mb-6">
+              Are you sure you want to delete <span className="font-semibold text-textMain">{currentProject.name}</span>? This action cannot be undone and all associated tasks will also be removed.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeletingProject}
+                className="px-4 py-2 rounded-lg text-textMuted hover:bg-surface disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteProject}
+                disabled={isDeletingProject}
+                className="px-4 py-2 rounded-lg bg-danger text-white hover:bg-danger/90 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isDeletingProject ? 'Deleting...' : 'Delete Project'}
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

@@ -11,6 +11,8 @@ const Projects = () => {
   const dispatch = useDispatch();
   
   const [showModal, setShowModal] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
+  const [deletingProjectId, setDeletingProjectId] = useState(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
@@ -28,12 +30,21 @@ const Projects = () => {
     }
   };
 
-  const handleDelete = async (e, projectId) => {
+  const openDeleteModal = (e, project) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this project? All associated tasks will also be removed.')) {
-      dispatch(deleteProject(projectId));
+    setProjectToDelete(project);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) return;
+
+    setDeletingProjectId(projectToDelete._id);
+    const resultAction = await dispatch(deleteProject(projectToDelete._id));
+    if (deleteProject.fulfilled.match(resultAction)) {
+      setProjectToDelete(null);
     }
+    setDeletingProjectId(null);
   };
 
   return (
@@ -71,7 +82,7 @@ const Projects = () => {
                     </div>
                     {user?.role === 'Admin' && (
                       <button 
-                        onClick={(e) => handleDelete(e, p._id)}
+                        onClick={(e) => openDeleteModal(e, p)}
                         className="p-2 text-textMuted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
                         title="Delete Project"
                       >
@@ -118,6 +129,39 @@ const Projects = () => {
                 <button type="submit" className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90">Create Project</button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Project Modal */}
+      {projectToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass w-full max-w-md p-6 rounded-2xl shadow-2xl border border-danger/20">
+            <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mb-4">
+              <FiTrash2 size={22} />
+            </div>
+            <h2 className="text-xl font-bold mb-2 text-textMain">Delete Project</h2>
+            <p className="text-sm text-textMuted mb-6">
+              Are you sure you want to delete <span className="font-semibold text-textMain">{projectToDelete.name}</span>? All associated tasks will also be removed.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setProjectToDelete(null)}
+                disabled={deletingProjectId === projectToDelete._id}
+                className="px-4 py-2 rounded-lg text-textMuted hover:bg-surface disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteProject}
+                disabled={deletingProjectId === projectToDelete._id}
+                className="px-4 py-2 rounded-lg bg-danger text-white hover:bg-danger/90 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {deletingProjectId === projectToDelete._id ? 'Deleting...' : 'Delete Project'}
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

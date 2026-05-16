@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { FiUser, FiMail, FiShield, FiTrash2 } from 'react-icons/fi';
 
 const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:5000/api';
@@ -9,6 +10,8 @@ const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:5000/api';
 const Team = () => {
   const [team, setTeam] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
+  const [memberToDelete, setMemberToDelete] = useState(null);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const { token, user } = useSelector(state => state.auth);
@@ -29,6 +32,33 @@ const Team = () => {
     if (user?.role === 'Admin') fetchTeam();
     else setIsLoading(false);
   }, [token, user]);
+
+  const openDeleteModal = (member) => {
+    if (member._id === user?._id) {
+      toast.error('You cannot delete your own account from Team Directory');
+      return;
+    }
+
+    setMemberToDelete(member);
+  };
+
+  const handleDeleteMember = async () => {
+    if (!memberToDelete) return;
+
+    setDeletingId(memberToDelete._id);
+    try {
+      await axios.delete(`${API_URL}/users/${memberToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTeam(prevTeam => prevTeam.filter(teamMember => teamMember._id !== memberToDelete._id));
+      toast.success('Team member deleted');
+      setMemberToDelete(null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete team member');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (user?.role !== 'Admin') {
     return (
@@ -95,7 +125,12 @@ const Team = () => {
                     {new Date(member.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-4 text-right">
-                    <button className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                    <button
+                      onClick={() => openDeleteModal(member)}
+                      disabled={deletingId === member._id || member._id === user?._id}
+                      className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={member._id === user?._id ? 'You cannot delete yourself here' : 'Delete member'}
+                    >
                       <FiTrash2 />
                     </button>
                   </td>
@@ -113,9 +148,7 @@ const Team = () => {
             <h2 className="text-xl font-bold mb-4 text-textMain">Invite New Member</h2>
             <form onSubmit={(e) => {
               e.preventDefault();
-              import('react-hot-toast').then(({ default: toast }) => {
-                toast.success(`Invitation sent to ${inviteEmail}!`);
-              });
+              toast.success(`Invitation sent to ${inviteEmail}!`);
               setShowInvite(false);
               setInviteEmail('');
             }} className="space-y-4">
@@ -128,6 +161,39 @@ const Team = () => {
                 <button type="submit" className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90">Send Invite</button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {memberToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass w-full max-w-md p-6 rounded-2xl shadow-2xl border border-danger/20">
+            <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mb-4">
+              <FiTrash2 size={22} />
+            </div>
+            <h2 className="text-xl font-bold mb-2 text-textMain">Delete Team Member</h2>
+            <p className="text-sm text-textMuted mb-6">
+              Are you sure you want to delete <span className="font-semibold text-textMain">{memberToDelete.name}</span>? This will remove them from the team and unassign their tasks.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setMemberToDelete(null)}
+                disabled={deletingId === memberToDelete._id}
+                className="px-4 py-2 rounded-lg text-textMuted hover:bg-surface disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteMember}
+                disabled={deletingId === memberToDelete._id}
+                className="px-4 py-2 rounded-lg bg-danger text-white hover:bg-danger/90 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {deletingId === memberToDelete._id ? 'Deleting...' : 'Delete Member'}
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
