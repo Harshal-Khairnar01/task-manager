@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateProfile, deleteAccount, upgradeAccount } from '../store/authSlice';
 import { motion } from 'framer-motion';
-import { FiUser, FiLock, FiBell, FiMoon, FiSun, FiTrash2, FiAlertTriangle, FiShield } from 'react-icons/fi';
+import { FiUser, FiLock, FiBell, FiMoon, FiSun, FiTrash2, FiAlertTriangle, FiShield, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
@@ -13,8 +13,10 @@ const Settings = () => {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [avatar, setAvatar] = useState(user?.avatar || '');
   const [adminCode, setAdminCode] = useState('');
+  const [showAdminCode, setShowAdminCode] = useState(false);
   
   const [theme, setTheme] = useState(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 
@@ -94,7 +96,17 @@ const Settings = () => {
               </h3>
               <div>
                 <label className="block text-sm text-textMuted mb-1">New Password (leave blank to keep current)</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-surface border border-textMain/10 rounded-lg p-3 text-textMain focus:outline-none focus:border-primary" />
+                <div className="relative">
+                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-surface border border-textMain/10 rounded-lg p-3 pr-12 text-textMain focus:outline-none focus:border-primary" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(prev => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-textMuted hover:text-textMain transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -115,13 +127,23 @@ const Settings = () => {
               </h2>
               <p className="text-xs text-textMuted mb-4">Enter the secret key to gain administrative privileges.</p>
               <form onSubmit={handleUpgrade} className="space-y-3">
-                <input 
-                  type="password" 
-                  value={adminCode} 
-                  onChange={e => setAdminCode(e.target.value)} 
-                  placeholder="Secret Key" 
-                  className="w-full bg-surface border border-textMain/10 rounded-lg p-2 text-sm text-textMain focus:outline-none focus:border-primary"
-                />
+                <div className="relative">
+                  <input
+                    type={showAdminCode ? 'text' : 'password'}
+                    value={adminCode}
+                    onChange={e => setAdminCode(e.target.value)}
+                    placeholder="Secret Key"
+                    className="w-full bg-surface border border-textMain/10 rounded-lg p-2 pr-10 text-sm text-textMain focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminCode(prev => !prev)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-textMuted hover:text-textMain transition-colors"
+                    aria-label={showAdminCode ? 'Hide admin secret key' : 'Show admin secret key'}
+                  >
+                    {showAdminCode ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  </button>
+                </div>
                 <button type="submit" className="w-full bg-primary text-white py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
                   Verify Key
                 </button>
