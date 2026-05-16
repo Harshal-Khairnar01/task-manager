@@ -7,8 +7,8 @@ Worksphere is a full-stack team task management application for organizing proje
 Use the following admin account to access all management features:
 
 ```txt
-Email: harshal.khairnar@ethara.ai
-Password: 12345678
+Email: harshalkhairnar@example.com
+Password: harshal@22
 ```
 
 Admins can create and delete projects, add project members, assign tasks, manage the team directory, and view team progress reports.
